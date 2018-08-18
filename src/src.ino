@@ -53,7 +53,7 @@
 */
 const int version = 10;                          // The firmware version 1.0
 
-#define EMONTX_V34                               // Sets the I/O pin allocation. 
+#define EMONTX_V32                               // Sets the I/O pin allocation. 
                                                  // use EMONTX_V2 or EMONTX_V32 or EMONTX_V34 or EMONTX_SHIELD as appropriate
                                                  // NOTE: You must still set the correct calibration coefficients
 
@@ -64,14 +64,14 @@ const int version = 10;                          // The firmware version 1.0
 #define SERIALPRINT                              // include 'human-friendly' print statement for commissioning - comment this line to exclude.
 
 // Pulse counting settings
-#define USEPULSECOUNT                            // include the ability to count pulses. Comment this line if pulse counting is not required.
+//#define USEPULSECOUNT                            // include the ability to count pulses. Comment this line if pulse counting is not required.
 #define PULSEINT 1                               // Interrupt no. for pulse counting: EmonTx V2 = 0, EmonTx V3 = 1, EmonTx Shield - see Wiki
 #define PULSEPIN 3                               // Interrupt input pin: EmonTx V2 = 2, EmonTx V3 = 3, EmonTx Shield - see Wiki
 #define PULSEMINPERIOD 110                       // minimum period between pulses (ms) - default pulse output meters = 100ms
                                                  //   Set to 0 for electronic sensor with solid-state output.
                                                  
 // RFM settings                                  // THIS SKETCH WILL NOT WORK WITH THE RFM12B radio.
-#define RFM69CW                                  // The type of Radio Module, or none.
+//#define RFM69CW                                  // The type of Radio Module, or none.
                                                  // Can be RFM69CW 
                                                  //   or SERIALOUT if a wired serial connection is used 
                                                  //   or EMONESP if an ESP WiFi module is used
@@ -85,7 +85,7 @@ const int version = 10;                          // The firmware version 1.0
 #undef RF12_868MHZ
 #undef RF12_915MHZ                               // Should not be present, but can cause problems if they are.
 
-#define RF12_433MHZ                              // Frequency of RFM module can be 
+#define RF12_868MHZ                              // Frequency of RFM module can be 
                                                  //    RF12_433MHZ, RF12_868MHZ or RF12_915MHZ. 
                                                  //  You should use the one matching the module you have.
                                                  //  (Note: this is different from the normal OEM definition.)
@@ -107,7 +107,7 @@ int networkGroup = 210;                          //  wireless network group
 // constants which must be set individually for each system
 
 
-double vCal = 268.97;     // calculated value is 240:11.6 for UK transformer x 13:1 for resistor divider = 268.97
+double vCal = 258.8;     // calculated value is 240:11.6 for UK transformer x 13:1 for resistor divider = 268.97
                           //   for the EU adapter use 260.00, for the USA adapter use 130.00
 #define VCAL_EU 260.0     // can use DIP switch 2 to set this as the starting value.                     
 double i1Cal = 90.91;     // calculated value is 100A:0.05A for transformer / 22 Ohms for resistor = 90.91, or 60.6 for emonTx Shield
