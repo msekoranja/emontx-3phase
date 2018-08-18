@@ -80,6 +80,7 @@ const int version = 10;                          // The firmware version 1.0
                                                  //      the IDE serial monitor output will be for information and debugging only.
                                                  // The sketch will hang if the wrong radio module is specified, or if one is specified and not fitted.
                                                  // For all serial output, the maximum is 9600 baud. The emonESP module must be set to suit.
+#define RFM12B
                                                  
 #undef RF12_433MHZ
 #undef RF12_868MHZ
@@ -107,7 +108,7 @@ int networkGroup = 210;                          //  wireless network group
 // constants which must be set individually for each system
 
 
-double vCal = 258.8;     // calculated value is 240:11.6 for UK transformer x 13:1 for resistor divider = 268.97
+double vCal = 260.0;     // calculated value is 240:11.6 for UK transformer x 13:1 for resistor divider = 268.97
                           //   for the EU adapter use 260.00, for the USA adapter use 130.00
 #define VCAL_EU 260.0     // can use DIP switch 2 to set this as the starting value.                     
 double i1Cal = 90.91;     // calculated value is 100A:0.05A for transformer / 22 Ohms for resistor = 90.91, or 60.6 for emonTx Shield

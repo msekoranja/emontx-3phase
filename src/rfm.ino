@@ -150,3 +150,105 @@ void unselect() {
 	interrupts();
 }
 #endif
+
+/*
+Interface for the RFM12B Radio Module
+*/
+
+#ifdef RFM12B
+
+#define SDOPIN 12
+
+void rfm_init(void)
+{  
+  // Set up to drive the Radio Module
+  pinMode (RFMSELPIN, OUTPUT);
+  digitalWrite(RFMSELPIN,HIGH);
+  // start the SPI library:
+  SPI.begin();
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(0);
+  SPI.setClockDivider(SPI_CLOCK_DIV8);
+  // initialise RFM12
+  delay(200); // wait for RFM12 POR
+  rfm_write(0x0000); // clear SPI
+  #ifdef RF12_868MHZ
+    rfm_write(0x80E7); // EL (ena dreg), EF (ena RX FIFO), 868 MHz, 12.0pF 
+    rfm_write(0xA640); // 868.00 MHz as used JeeLib 
+  #elif defined RF12_915MHZ
+    rfm_write(0x80F7); // EL (ena dreg), EF (ena RX FIFO), 915 MHz, 12.0pF 
+    rfm_write(0xA640); // 912.00 MHz as used JeeLib   
+  #else // default to 433 MHz band
+    rfm_write(0x80D7); // EL (ena dreg), EF (ena RX FIFO), 433 MHz, 12.0pF 
+    rfm_write(0xA640); // 434.00 MHz as used JeeLib 
+  #endif  
+  rfm_write(0x8208); // Turn on crystal,!PA
+  rfm_write(0xA640); // 433 or 868 MHz exactly
+  rfm_write(0xC606); // approx 49.2 Kbps, as used by emonTx
+  //rfm_write(0xC657); // approx 3.918 Kbps, better for long range
+  rfm_write(0xCC77); // PLL 
+  rfm_write(0x94A0); // VDI,FAST,134kHz,0dBm,-103dBm 
+  rfm_write(0xC2AC); // AL,!ml,DIG,DQD4 
+  rfm_write(0xCA83); // FIFO8,2-SYNC,!ff,DR 
+  rfm_write(0xCEd2); // SYNC=2DD2
+  rfm_write(0xC483); // @PWR,NO RSTRIC,!st,!fi,OE,EN 
+  rfm_write(0x9850); // !mp,90kHz,MAX OUT 
+  rfm_write(0xE000); // wake up timer - not used 
+  rfm_write(0xC800); // low duty cycle - not used 
+  rfm_write(0xC000); // 1.0MHz,2.2V 
+}
+
+
+// transmit data via the RFM12
+void rfm_send(const byte *data, const byte size, const byte group, const byte node)
+{
+  byte i=0,next,txstate=0;
+  word crc=~0;
+  
+  rfm_write(0x8228); // OPEN PA
+  rfm_write(0x8238);
+
+  digitalWrite(RFMSELPIN,LOW);
+  SPI.transfer(0xb8); // tx register write command
+  
+  while(txstate<13)
+  {
+    while(digitalRead(SDOPIN)==0); // wait for SDO to go high
+    switch(txstate)
+    {
+      case 0:
+      case 1:
+      case 2: next=0xaa; txstate++; break;
+      case 3: next=0x2d; txstate++; break;
+      case 4: next=group; txstate++; break;
+      case 5: next=node; txstate++; break; // node ID
+      case 6: next=size; txstate++; break;
+      case 7: next=data[i++]; if(i==size) txstate++; break;
+      case 8: next=(byte)crc; txstate++; break;
+      case 9: next=(byte)(crc>>8); txstate++; break;
+      case 10:
+      case 11:
+      case 12: next=0xaa; txstate++; break; // dummy bytes (if <3 CRC gets corrupted sometimes)
+    }
+    if((txstate>4)&&(txstate<9)) crc = _crc16_update(crc, next);
+    SPI.transfer(next);
+  }
+  digitalWrite(RFMSELPIN,HIGH);
+
+  rfm_write( 0x8208 ); // CLOSE PA
+  rfm_write( 0x8200 ); // enter sleep
+}
+
+
+// write a command to the RFM12
+word rfm_write(word cmd)
+{
+  word result;
+  
+  digitalWrite(RFMSELPIN,LOW);
+  result=(SPI.transfer(cmd>>8)<<8) | SPI.transfer(cmd & 0xff);
+  digitalWrite(RFMSELPIN,HIGH);
+  return result;
+}
+
+#endif
