@@ -406,6 +406,9 @@ void setup()
    #ifdef EMONESP
      Serial.println(F("Using ESP8266 serial output"));
    #endif
+   #ifdef RFM12B
+     Serial.println(F("Using RFM12B Radio"));
+   #endif
    load_config(true);                                 // Load RF config from EEPROM (if any exists)
   #else   // #if !defined SERIALOUT && !defined EMONESP 
    load_config(false);   
@@ -865,7 +868,7 @@ void calculateTiming(void)
 
 void sendResults()
 {
-  #ifdef RFM69CW    
+  #if (defined RFM12B || defined RFM69CW)
     rfm_send((byte *)&emontx, sizeof(emontx), networkGroup, nodeID);      // *SEND RF DATA*
   #else
 
